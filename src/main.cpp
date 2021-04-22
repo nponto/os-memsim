@@ -10,6 +10,8 @@ void allocateVariable(uint32_t pid, std::string var_name, DataType type, uint32_
 void setVariable(uint32_t pid, std::string var_name, uint32_t offset, void *value, Mmu *mmu, PageTable *page_table, void *memory);
 void freeVariable(uint32_t pid, std::string var_name, Mmu *mmu, PageTable *page_table);
 void terminateProcess(uint32_t pid, Mmu *mmu, PageTable *page_table);
+void splitString(std::string text, char d, std::vector<std::string>& result);
+
 
 int main(int argc, char **argv)
 {
@@ -26,6 +28,7 @@ int main(int argc, char **argv)
 
     // Create physical 'memory'
     uint32_t mem_size = 67108864;
+
     void *memory = malloc(mem_size); // 64 MB (64 * 1024 * 1024)
 
     // Create MMU and Page Table
@@ -39,6 +42,32 @@ int main(int argc, char **argv)
     while (command != "exit") {
         // Handle command
         // TODO: implement this!
+        std::vector<std::string> listOfArgs;
+
+        splitString(command, ' ', listOfArgs);
+
+        command = listOfArgs[0];
+
+        if (command == "create"){
+        
+            createProcess(stoi(listOfArgs[1]), stoi(listOfArgs[2]), mmu, page_table);
+
+        } else if (command == "allocate") {
+
+        } else if (command == "set") {
+
+        } else if (command == "free") {
+
+        } else if (command == "terminate") {
+
+        } else if (command == "print") {
+            if (listOfArgs[1] == "mmu"){
+                mmu->print();
+            }
+        } else {
+            printf("error: command not recognized");
+        }
+
 
         // Get next command
         std::cout << "> ";
@@ -76,6 +105,16 @@ void createProcess(int text_size, int data_size, Mmu *mmu, PageTable *page_table
     //   - create new process in the MMU
     //   - allocate new variables for the <TEXT>, <GLOBALS>, and <STACK>
     //   - print pid
+    int pid = mmu->createProcess();
+
+    uint32_t stack_size = 65536;
+
+    mmu->addVariableToProcess(pid, "<TEXT>", DataType::Int, text_size, 0);
+    mmu->addVariableToProcess(pid, "<GLOBAL>", DataType::Int, data_size, text_size);
+    mmu->addVariableToProcess(pid, "<STACK>", DataType::Int, stack_size, text_size + data_size);
+
+    std::cout << pid << "\n";
+
 }
 
 void allocateVariable(uint32_t pid, std::string var_name, DataType type, uint32_t num_elements, Mmu *mmu, PageTable *page_table)
@@ -85,6 +124,13 @@ void allocateVariable(uint32_t pid, std::string var_name, DataType type, uint32_
     //   - if no hole is large enough, allocate new page(s)
     //   - insert variable into MMU
     //   - print virtual memory address 
+
+    std::vector<std::string> keys = page_table->sortedKeys();
+
+
+
+    
+
 }
 
 void setVariable(uint32_t pid, std::string var_name, uint32_t offset, void *value, Mmu *mmu, PageTable *page_table, void *memory)
@@ -108,4 +154,60 @@ void terminateProcess(uint32_t pid, Mmu *mmu, PageTable *page_table)
     // TODO: implement this!
     //   - remove process from MMU
     //   - free all pages associated with given process
+}
+
+void splitString(std::string text, char d, std::vector<std::string>& result)
+{
+    enum states { NONE, IN_WORD, IN_STRING } state = NONE;
+
+    int i;
+    std::string token;
+    result.clear();
+    for (i = 0; i < text.length(); i++)
+    {
+        char c = text[i];
+        switch (state) {
+            case NONE:
+                if (c != d)
+                {
+                    if (c == '\"')
+                    {
+                        state = IN_STRING;
+                        token = "";
+                    }
+                    else
+                    {
+                        state = IN_WORD;
+                        token = c;
+                    }
+                }
+                break;
+            case IN_WORD:
+                if (c == d)
+                {
+                    result.push_back(token);
+                    state = NONE;
+                }
+                else
+                {
+                    token += c;
+                }
+                break;
+            case IN_STRING:
+                if (c == '\"')
+                {
+                    result.push_back(token);
+                    state = NONE;
+                }
+                else
+                {
+                    token += c;
+                }
+                break;
+        }
+    }
+    if (state != NONE)
+    {
+        result.push_back(token);
+    }
 }

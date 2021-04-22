@@ -1,4 +1,5 @@
 #include "mmu.h"
+#include "sstream"
 
 Mmu::Mmu(int memory_size)
 {
@@ -55,11 +56,27 @@ void Mmu::print()
 
     std::cout << " PID  | Variable Name | Virtual Addr | Size" << std::endl;
     std::cout << "------+---------------+--------------+------------" << std::endl;
+
+    int pidSpacing = 6;
+    int varNameSpacing = 15;
+    int virtAddrSpacing = 14;
+    int sizeSpacing = 12;
+
     for (i = 0; i < _processes.size(); i++)
     {
         for (j = 0; j < _processes[i]->variables.size(); j++)
         {
             // TODO: print all variables (excluding <FREE_SPACE> entries)
+
+            if (_processes[i]->variables[j]->name != "<FREE_SPACE>"){
+                std::cout << _processes[i]->pid << " ";
+                std::cout << _processes[i]->variables[j]->name << " ";
+                std::stringstream ss;
+                ss << std::hex << _processes[i]->variables[j]->virtual_address;
+                std::string res (ss.str());
+                std::cout << res << " ";
+                std::cout << _processes[i]->variables[j]->size << "\n";
+            }
         }
     }
 }
