@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-enum DataType : uint8_t {Char, Short, Int, Float, Long, Double};
+enum DataType : uint8_t {FreeSpace, Char, Short, Int, Float, Long, Double};
 
 typedef struct Variable {
     std::string name;
@@ -31,6 +31,10 @@ public:
 
     uint32_t createProcess();
     void addVariableToProcess(uint32_t pid, std::string var_name, DataType type, uint32_t size, uint32_t address);
+    std::vector<Process*> getAllProcesses();
+    std::vector<Variable*> getVariablesByPid(int pid);
+    void printProcesses();
+    void terminateProcess(int pid);
     void print();
 };
 

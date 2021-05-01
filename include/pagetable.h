@@ -34,7 +34,12 @@ public:
     ~PageTable();
 
     void addEntry(uint32_t pid, int page_number);
+    void removeAllEntriesByID(uint32_t pid);
     int getPhysicalAddress(uint32_t pid, uint32_t virtual_address);
+    // bool isOtherVarsOnPage(int page_number);
+    std::vector<int> getProccesesList();
+    void removePage(uint32_t pid, int page_number);
+    int getPageSize();
     void print();
 };
 
